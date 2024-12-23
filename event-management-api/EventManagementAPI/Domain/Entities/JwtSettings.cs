@@ -1,4 +1,4 @@
-﻿namespace EventManagementAPI.Domain.Models.Authentication;
+﻿namespace EventManagementAPI.Domain.Entities;
 
 public class JwtSettings
 {

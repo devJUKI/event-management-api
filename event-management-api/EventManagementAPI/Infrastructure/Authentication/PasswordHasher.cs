@@ -1,4 +1,4 @@
-﻿using EventManagementAPI.Core.Interfaces.Authentication;
+﻿using EventManagementAPI.Domain.Interfaces;
 using System.Security.Cryptography;
 
 namespace EventManagementAPI.Infrastructure.Authentication;

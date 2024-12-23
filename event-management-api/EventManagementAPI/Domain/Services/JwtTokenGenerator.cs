@@ -1,10 +1,10 @@
-﻿using EventManagementAPI.Domain.Models.Authentication;
-using EventManagementAPI.Domain.Interfaces;
+﻿using EventManagementAPI.Domain.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text;
+using EventManagementAPI.Domain.Entities;
 
 namespace EventManagementAPI.Domain.Services;
 

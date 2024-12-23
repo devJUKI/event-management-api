@@ -1,4 +1,4 @@
-﻿namespace EventManagementAPI.Core.Interfaces.Authentication;
+﻿namespace EventManagementAPI.Domain.Interfaces;
 
 public interface IPasswordHasher
 {

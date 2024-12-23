@@ -1,13 +1,17 @@
-﻿using EventManagementAPI.Core.Interfaces.Authentication;
+﻿using EventManagementAPI.Domain.Entities;
 using EventManagementAPI.Domain.Interfaces;
-using EventManagementAPI.Domain.Models.Authentication;
 using EventManagementAPI.Domain.Services;
 using EventManagementAPI.Infrastructure.Authentication;
 using EventManagementAPI.Infrastructure.Interfaces;
 using EventManagementAPI.Infrastructure.Persistence;
 using EventManagementAPI.Infrastructure.Repositories;
 using EventManagementAPI.Infrastructure.Services;
+using EventManagementAPI.Validation;
+using EventManagementAPI.ViewModels.Authentication;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -28,6 +32,8 @@ public static class DependencyInjection
         });
 
         services.AddAuth(configuration);
+
+        services.AddValidatorsFromAssemblyContaining<Program>();
 
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<IAuthenticationInfrastructureService, AuthenticationInfrastructureService>();

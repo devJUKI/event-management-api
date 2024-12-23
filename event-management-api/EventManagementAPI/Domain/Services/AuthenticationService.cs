@@ -1,5 +1,4 @@
-﻿using EventManagementAPI.Core.Interfaces.Authentication;
-using EventManagementAPI.Domain.Models.Authentication;
+﻿using EventManagementAPI.Domain.Models.Authentication;
 using EventManagementAPI.ViewModels.Authentication;
 using EventManagementAPI.Infrastructure.Interfaces;
 using EventManagementAPI.ViewModels.Common;
@@ -28,11 +27,6 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<Result<AuthResponseViewModel>> Register(RegisterDomainModel domainModel, CancellationToken cancellation)
     {
-        if (string.IsNullOrWhiteSpace(domainModel.Password))
-        {
-            return Result.Failure<AuthResponseViewModel>(new Error(HttpStatusCode.BadRequest, "Password is empty"));
-        }
-
         var hashedPassword = _passwordHasher.Hash(domainModel.Password);
 
         var userResult = UserDomainModel.Create(
@@ -53,7 +47,7 @@ public class AuthenticationService : IAuthenticationService
 
         if (existingUser != null)
         {
-            return Result.Failure<AuthResponseViewModel>(new Error(HttpStatusCode.Conflict, "User with this email or username already exists"));
+            return Result.Failure<AuthResponseViewModel>(new Error(HttpStatusCode.Conflict, "User with this email/username already exists."));
         }
 
         await _infrastructureService.CreateUserAsync(user, cancellation);
@@ -69,21 +63,11 @@ public class AuthenticationService : IAuthenticationService
 
     public async Task<Result<AuthResponseViewModel>> Login(LoginDomainModel domainModel, CancellationToken cancellation)
     {
-        if (string.IsNullOrWhiteSpace(domainModel.Password))
-        {
-            return Result.Failure<AuthResponseViewModel>(new Error(HttpStatusCode.BadRequest, "Password is not specified"));
-        }
-
-        if (string.IsNullOrWhiteSpace(domainModel.Email))
-        {
-            return Result.Failure<AuthResponseViewModel>(new Error(HttpStatusCode.BadRequest, "Email is not specified"));
-        }
-
         var user = await _infrastructureService.GetUserByEmailAsync(domainModel.Email, cancellation);
 
         if (user == null || !_passwordHasher.Verify(domainModel.Password, user.HashedPassword))
         {
-            return Result.Failure<AuthResponseViewModel>(new Error(HttpStatusCode.Unauthorized, "Wrong credentials"));
+            return Result.Failure<AuthResponseViewModel>(new Error(HttpStatusCode.Unauthorized, "Wrong credentials."));
         }
 
         var token = _jwtTokenGenerator.GenerateJwtToken(user.Id, user.Username, user.Roles);

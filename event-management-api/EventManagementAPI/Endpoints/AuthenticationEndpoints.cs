@@ -1,8 +1,9 @@
-﻿using EventManagementAPI.Domain.Extensions;
-using EventManagementAPI.Domain.Helpers;
-using EventManagementAPI.Domain.Interfaces;
-using EventManagementAPI.Domain.Models.Authentication;
+﻿using EventManagementAPI.Domain.Models.Authentication;
 using EventManagementAPI.ViewModels.Authentication;
+using EventManagementAPI.Domain.Interfaces;
+using EventManagementAPI.Domain.Extensions;
+using EventManagementAPI.Domain.Helpers;
+using EventManagementAPI.Filters;
 
 namespace EventManagementAPI.Endpoints;
 
@@ -21,15 +22,16 @@ public static class AuthenticationEndpoints
         {
             var domainModel = new RegisterDomainModel
             {
-                Username = viewModel.Username,
-                Email = viewModel.Email,
-                Password = viewModel.Password
+                Username = viewModel.Username!,
+                Email = viewModel.Email!,
+                Password = viewModel.Password!
             };
 
             var result = await service.Register(domainModel, cancellationToken);
 
             return result.Match(CustomResults.Ok, CustomResults.Problem);
-        });
+        })
+        .AddEndpointFilter<ValidationFilter<RegisterRequestViewModel>>();
 
         mapGroup.MapPost("/login", async (
             LoginRequestViewModel viewModel,
@@ -38,13 +40,14 @@ public static class AuthenticationEndpoints
         {
             var domainModel = new LoginDomainModel
             {
-                Email = viewModel.Email,
-                Password = viewModel.Password
+                Email = viewModel.Email!,
+                Password = viewModel.Password!
             };
 
             var result = await service.Login(domainModel, cancellationToken);
 
             return result.Match(CustomResults.Ok, CustomResults.Problem);
-        });
+        })
+        .AddEndpointFilter<ValidationFilter<LoginRequestViewModel>>();
     }
 }
