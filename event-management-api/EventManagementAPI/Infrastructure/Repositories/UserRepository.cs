@@ -1,8 +1,8 @@
-﻿using EventManagementAPI.Domain.Models.Authentication;
-using EventManagementAPI.Infrastructure.Persistence;
+﻿using EventManagementAPI.Infrastructure.Persistence;
 using EventManagementAPI.Infrastructure.Interfaces;
 using EventManagementAPI.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using EventManagementAPI.Domain.Models;
 
 namespace EventManagementAPI.Infrastructure.Repositories;
 
@@ -41,25 +41,27 @@ public class UserRepository : IUserRepository
         return userModelResult;
     }
 
-    public async Task<UserDomainModel?> GetByEmailAndUsernameAsync(string email, string username, CancellationToken cancellation)
+    public async Task<bool> ExistsByEmailOrUsernameAsync(string email, string username, CancellationToken cancellation)
     {
-        var user = await _dbContext.Users
-            .Include(u => u.UserRoles)
-            .ThenInclude(ur => ur.Role)
-            .SingleOrDefaultAsync(u =>
-                u.Email == email &&
+        var exists = await _dbContext.Users
+            .AnyAsync(u =>
+                u.Email == email ||
                 u.Username == username,
             cancellation);
 
-        if (user == null) return null;
-
-        var userModelResult = new UserDomainModel(user);
-        return userModelResult;
+        return exists;
     }
 
     public async Task InsertAsync(UserDomainModel userModel, CancellationToken cancellation)
     {
-        var roles = _dbContext.Roles.Where(r => userModel.Roles.Contains(r.Name)).ToList();
+        var userRoles = await _dbContext.Roles
+            .Where(r => userModel.Roles.Contains(r.Name))
+            .Select(role => new UserRole
+            {
+                RoleId = role.Id,
+                Role = role
+            })
+            .ToListAsync(cancellation);
 
         var user = new User
         {
@@ -68,14 +70,34 @@ public class UserRepository : IUserRepository
             Email = userModel.Email,
             HashedPassword = userModel.HashedPassword,
             CreatedAt = userModel.CreatedAt,
-            UserRoles = roles.Select(role => new UserRole
-            {
-                RoleId = role.Id,
-                Role = role
-            }).ToList()
+            UserRoles = userRoles
         };
 
         await _dbContext.Users.AddAsync(user, cancellation);
+    }
+
+    public async Task UpdateAsync(UserDomainModel userModel, CancellationToken cancellation)
+    {
+        var userRoles = await _dbContext.Roles
+            .Where(r => userModel.Roles.Contains(r.Name))
+            .Select(role => new UserRole
+            {
+                RoleId = role.Id,
+                Role = role
+            })
+            .ToListAsync(cancellation);
+
+        var user = await _dbContext.Users.FindAsync(userModel.Id);
+
+        if (user == null)
+        {
+            throw new InvalidOperationException(nameof(user));
+        }
+
+        user.Username = userModel.Username;
+        user.Email = userModel.Email;
+
+        _dbContext.Users.Update(user);
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellation)

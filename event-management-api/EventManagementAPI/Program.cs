@@ -1,4 +1,6 @@
 using EventManagementAPI.Endpoints;
+using EventManagementAPI.Middleware;
+using Microsoft.Extensions.Configuration;
 
 namespace EventManagementAPI
 {
@@ -9,6 +11,7 @@ namespace EventManagementAPI
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddAuthorization();
+
             builder.Services.AddEventManagementApi(builder.Configuration);
 
             builder.Services.AddEndpointsApiExplorer();
@@ -24,10 +27,13 @@ namespace EventManagementAPI
 
             app.UseHttpsRedirection();
 
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapAuthenticationEndpoints();
+            app.MapUserManagementEndpoints();
 
             app.Run();
         }

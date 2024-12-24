@@ -1,13 +1,13 @@
-﻿using EventManagementAPI.Domain.Models.Authentication;
+﻿using EventManagementAPI.Domain.Models;
 using EventManagementAPI.Infrastructure.Interfaces;
 
 namespace EventManagementAPI.Infrastructure.Services;
 
-public class AuthenticationInfrastructureService : IAuthenticationInfrastructureService
+public class UserInfrastructureService : IUserInfrastructureService
 {
     private readonly IUserRepository _userRepository;
 
-    public AuthenticationInfrastructureService(IUserRepository userRepository)
+    public UserInfrastructureService(IUserRepository userRepository)
     {
         _userRepository = userRepository;
     }
@@ -22,14 +22,19 @@ public class AuthenticationInfrastructureService : IAuthenticationInfrastructure
         return _userRepository.GetByEmailAsync(email, cancellation);
     }
 
-    public Task<UserDomainModel?> GetUserByEmailAndUsernameAsync(string email, string username, CancellationToken cancellation)
+    public Task<bool> ExistsByEmailOrUsernameAsync(string email, string username, CancellationToken cancellation)
     {
-        return _userRepository.GetByEmailAndUsernameAsync(email, username, cancellation);
+        return _userRepository.ExistsByEmailOrUsernameAsync(email, username, cancellation);
     }
 
     public Task CreateUserAsync(UserDomainModel userModel, CancellationToken cancellation)
     {
         return _userRepository.InsertAsync(userModel, cancellation);
+    }
+
+    public Task UpdateUserAsync(UserDomainModel userModel, CancellationToken cancellation)
+    {
+        return _userRepository.UpdateAsync(userModel, cancellation);
     }
 
     public Task SaveChangesAsync(CancellationToken cancellation)

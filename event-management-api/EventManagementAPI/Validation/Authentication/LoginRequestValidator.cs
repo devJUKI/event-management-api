@@ -1,7 +1,7 @@
 ﻿using EventManagementAPI.ViewModels.Authentication;
 using FluentValidation;
 
-namespace EventManagementAPI.Validation;
+namespace EventManagementAPI.Validation.Authentication;
 
 public class LoginRequestValidator : AbstractValidator<LoginRequestViewModel>
 {

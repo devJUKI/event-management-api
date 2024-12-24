@@ -1,17 +1,17 @@
-﻿using EventManagementAPI.Core.Entities;
-using EventManagementAPI.Domain.Constants;
+﻿using EventManagementAPI.Domain.Constants;
 using EventManagementAPI.Domain.Entities;
-using System.Net;
+using EventManagementAPI.Core.Entities;
 using System.Text.RegularExpressions;
+using System.Net;
 
-namespace EventManagementAPI.Domain.Models.Authentication;
+namespace EventManagementAPI.Domain.Models;
 
 public class UserDomainModel
 {
     public Guid Id { get; } = Guid.NewGuid();
-    public string Username { get; }
-    public string Email { get; }
-    public string HashedPassword { get; }
+    public string Email { get; private set; }
+    public string Username { get; private set; }
+    public string HashedPassword { get; private set; }
     public DateTime CreatedAt { get; }
     public List<string> Roles { get; }
 
@@ -38,9 +38,25 @@ public class UserDomainModel
             .ToList();
     }
 
+    public Result Update(string? username, string? email)
+    {
+        var validationResult = ValidateUserData(username, email, HashedPassword, CreatedAt);
+
+        if (!validationResult.IsSuccess)
+        {
+            return Result.Failure<UserDomainModel>(validationResult.Error);
+        }
+
+        Username = username!;
+        Email = email!;
+
+        return Result.Success();
+    }
+
     public static Result<UserDomainModel> Create(string? username, string? email, string? hashedPassword, DateTime? createdAt, List<string> roles)
     {
         var validationResult = ValidateUserData(username, email, hashedPassword, createdAt);
+
         if (!validationResult.IsSuccess)
         {
             return Result.Failure<UserDomainModel>(validationResult.Error);

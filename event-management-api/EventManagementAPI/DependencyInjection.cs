@@ -1,20 +1,16 @@
-﻿using EventManagementAPI.Domain.Entities;
-using EventManagementAPI.Domain.Interfaces;
-using EventManagementAPI.Domain.Services;
-using EventManagementAPI.Infrastructure.Authentication;
-using EventManagementAPI.Infrastructure.Interfaces;
-using EventManagementAPI.Infrastructure.Persistence;
+﻿using EventManagementAPI.Infrastructure.Authentication;
 using EventManagementAPI.Infrastructure.Repositories;
-using EventManagementAPI.Infrastructure.Services;
-using EventManagementAPI.Validation;
-using EventManagementAPI.ViewModels.Authentication;
-using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity.Data;
+using EventManagementAPI.Infrastructure.Persistence;
+using EventManagementAPI.Infrastructure.Interfaces;
+using EventManagementAPI.Infrastructure.Services;
+using EventManagementAPI.Domain.Interfaces;
+using EventManagementAPI.Domain.Entities;
+using EventManagementAPI.Domain.Services;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
+using FluentValidation;
 using System.Text;
 
 namespace EventManagementAPI;
@@ -25,7 +21,7 @@ public static class DependencyInjection
     {
         var connectionString = configuration.GetConnectionString("ConnectionString")
             ?? throw new Exception("Connection string is null");
-        
+
         services.AddDbContext<EventManagementDbContext>(options =>
         {
             options.UseSqlServer(connectionString);
@@ -36,8 +32,9 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining<Program>();
 
         services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddScoped<IAuthenticationInfrastructureService, AuthenticationInfrastructureService>();
-        services.AddTransient<IUserRepository, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserInfrastructureService, UserInfrastructureService>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
     }
@@ -51,6 +48,7 @@ public static class DependencyInjection
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                options.MapInboundClaims = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,

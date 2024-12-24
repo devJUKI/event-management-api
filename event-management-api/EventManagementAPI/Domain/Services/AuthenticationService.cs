@@ -6,17 +6,18 @@ using EventManagementAPI.Domain.Interfaces;
 using EventManagementAPI.Domain.Constants;
 using EventManagementAPI.Domain.Entities;
 using System.Net;
+using EventManagementAPI.Domain.Models;
 
 namespace EventManagementAPI.Domain.Services;
 
 public class AuthenticationService : IAuthenticationService
 {
-    private readonly IAuthenticationInfrastructureService _infrastructureService;
+    private readonly IUserInfrastructureService _infrastructureService;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
 
     public AuthenticationService(
-        IAuthenticationInfrastructureService infrastructureService,
+        IUserInfrastructureService infrastructureService,
         IPasswordHasher passwordHasher,
         IJwtTokenGenerator jwtTokenGenerator)
     {
@@ -43,9 +44,9 @@ public class AuthenticationService : IAuthenticationService
 
         var user = userResult.Payload;
 
-        var existingUser = await _infrastructureService.GetUserByEmailAndUsernameAsync(user.Email, user.Username, cancellation);
+        var userExists = await _infrastructureService.ExistsByEmailOrUsernameAsync(user.Email, user.Username, cancellation);
 
-        if (existingUser != null)
+        if (userExists)
         {
             return Result.Failure<AuthResponseViewModel>(new Error(HttpStatusCode.Conflict, "User with this email/username already exists."));
         }
