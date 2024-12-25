@@ -8,12 +8,12 @@ using System.Net;
 
 namespace EventManagementAPI.Domain.Services;
 
-public class UserService : IUserService
+public class UserManagementService : IUserManagementService
 {
     private readonly IUserInfrastructureService _infrastructureService;
     private readonly IPasswordHasher _passwordHasher;
 
-    public UserService(IUserInfrastructureService userInfrastructureService, IPasswordHasher passwordHasher)
+    public UserManagementService(IUserInfrastructureService userInfrastructureService, IPasswordHasher passwordHasher)
     {
         _infrastructureService = userInfrastructureService;
         _passwordHasher = passwordHasher;

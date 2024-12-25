@@ -32,9 +32,13 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining<Program>();
 
         services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
+        services.AddScoped<IEventManagementService, EventManagementService>();
         services.AddScoped<IUserInfrastructureService, UserInfrastructureService>();
+        services.AddScoped<IEventInfrastructureService, EventInfrastructureService>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
     }

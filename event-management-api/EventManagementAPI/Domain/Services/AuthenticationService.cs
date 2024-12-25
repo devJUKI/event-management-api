@@ -6,7 +6,7 @@ using EventManagementAPI.Domain.Interfaces;
 using EventManagementAPI.Domain.Constants;
 using EventManagementAPI.Domain.Entities;
 using System.Net;
-using EventManagementAPI.Domain.Models;
+using EventManagementAPI.Domain.Models.Common;
 
 namespace EventManagementAPI.Domain.Services;
 

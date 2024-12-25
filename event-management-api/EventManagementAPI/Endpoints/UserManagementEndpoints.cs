@@ -1,10 +1,9 @@
-﻿using EventManagementAPI.Domain.Extensions;
-using EventManagementAPI.Domain.Helpers;
-using EventManagementAPI.Domain.Interfaces;
-using EventManagementAPI.Domain.Models.UserManagement;
-using EventManagementAPI.Filters;
-using EventManagementAPI.ViewModels.Authentication;
+﻿using EventManagementAPI.Domain.Models.UserManagement;
 using EventManagementAPI.ViewModels.UserManagement;
+using EventManagementAPI.Domain.Interfaces;
+using EventManagementAPI.Domain.Extensions;
+using EventManagementAPI.Domain.Helpers;
+using EventManagementAPI.Filters;
 
 namespace EventManagementAPI.Endpoints;
 
@@ -18,7 +17,7 @@ public static class UserManagementEndpoints
 
         mapGroup.MapGet("/{userId}", async (
             Guid userId,
-            IUserService userService,
+            IUserManagementService userService,
             CancellationToken cancellation) =>
         {
             var result = await userService.GetUser(userId, cancellation);
@@ -30,7 +29,7 @@ public static class UserManagementEndpoints
         mapGroup.MapPut("/{userId}", async (
             Guid userId,
             UpdateUserRequestViewModel viewModel,
-            IUserService userService,
+            IUserManagementService userService,
             CancellationToken cancellation) =>
         {
             var domainModel = new UpdateUserRequestDomainModel

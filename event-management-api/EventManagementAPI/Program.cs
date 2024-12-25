@@ -1,6 +1,5 @@
-using EventManagementAPI.Endpoints;
 using EventManagementAPI.Middleware;
-using Microsoft.Extensions.Configuration;
+using EventManagementAPI.Endpoints;
 
 namespace EventManagementAPI
 {
@@ -34,6 +33,7 @@ namespace EventManagementAPI
 
             app.MapAuthenticationEndpoints();
             app.MapUserManagementEndpoints();
+            app.MapEventManagementEndpoints();
 
             app.Run();
         }

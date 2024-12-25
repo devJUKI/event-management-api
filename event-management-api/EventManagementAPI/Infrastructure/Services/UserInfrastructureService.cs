@@ -1,4 +1,4 @@
-﻿using EventManagementAPI.Domain.Models;
+﻿using EventManagementAPI.Domain.Models.Common;
 using EventManagementAPI.Infrastructure.Interfaces;
 
 namespace EventManagementAPI.Infrastructure.Services;

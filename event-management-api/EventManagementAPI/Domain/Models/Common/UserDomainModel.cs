@@ -4,7 +4,7 @@ using EventManagementAPI.Core.Entities;
 using System.Text.RegularExpressions;
 using System.Net;
 
-namespace EventManagementAPI.Domain.Models;
+namespace EventManagementAPI.Domain.Models.Common;
 
 public class UserDomainModel
 {
@@ -40,7 +40,7 @@ public class UserDomainModel
 
     public Result Update(string? username, string? email)
     {
-        var validationResult = ValidateUserData(username, email, HashedPassword, CreatedAt);
+        var validationResult = ValidateUserData(username, email, HashedPassword, CreatedAt, Roles);
 
         if (!validationResult.IsSuccess)
         {
@@ -53,9 +53,9 @@ public class UserDomainModel
         return Result.Success();
     }
 
-    public static Result<UserDomainModel> Create(string? username, string? email, string? hashedPassword, DateTime? createdAt, List<string> roles)
+    public static Result<UserDomainModel> Create(string? username, string? email, string? hashedPassword, DateTime? createdAt, List<string>? roles)
     {
-        var validationResult = ValidateUserData(username, email, hashedPassword, createdAt);
+        var validationResult = ValidateUserData(username, email, hashedPassword, createdAt, roles);
 
         if (!validationResult.IsSuccess)
         {
@@ -66,26 +66,31 @@ public class UserDomainModel
         return Result.Success(user);
     }
 
-    private static Result ValidateUserData(string? username, string? email, string? hashedPassword, DateTime? createdAt)
+    private static Result ValidateUserData(string? username, string? email, string? hashedPassword, DateTime? createdAt, List<string>? roles)
     {
         if (string.IsNullOrWhiteSpace(username) || username.Length < UserData.MinUsernameLength)
         {
-            return Result.Failure(new Error(HttpStatusCode.BadRequest, "Username is invalid"));
+            return Result.Failure(new Error(HttpStatusCode.BadRequest, "Username is invalid."));
         }
 
         if (string.IsNullOrWhiteSpace(email) || !_emailRegex.IsMatch(email))
         {
-            return Result.Failure(new Error(HttpStatusCode.BadRequest, "Email is invalid"));
+            return Result.Failure(new Error(HttpStatusCode.BadRequest, "Email is invalid."));
         }
 
         if (string.IsNullOrWhiteSpace(hashedPassword))
         {
-            return Result.Failure(new Error(HttpStatusCode.BadRequest, "Hashed password is invalid"));
+            return Result.Failure(new Error(HttpStatusCode.BadRequest, "Hashed password is invalid."));
         }
 
         if (!createdAt.HasValue)
         {
-            return Result.Failure(new Error(HttpStatusCode.BadRequest, "Creation date is null"));
+            return Result.Failure(new Error(HttpStatusCode.BadRequest, "Creation date is null."));
+        }
+
+        if (roles == null || roles.Count == 0)
+        {
+            return Result.Failure(new Error(HttpStatusCode.BadRequest, "User has to have at least 1 role."));
         }
 
         return Result.Success();

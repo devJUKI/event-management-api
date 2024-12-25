@@ -4,7 +4,7 @@ using EventManagementAPI.Domain.Models.UserManagement;
 
 namespace EventManagementAPI.Domain.Interfaces;
 
-public interface IUserService
+public interface IUserManagementService
 {
     Task<Result<UserResponseViewModel>> GetUser(Guid userId, CancellationToken cancellation);
     Task<Result<UserResponseViewModel>> UpdateUser(Guid userId, UpdateUserRequestDomainModel domainModel, CancellationToken cancellation);

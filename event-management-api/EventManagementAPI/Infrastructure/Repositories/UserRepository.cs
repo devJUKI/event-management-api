@@ -2,7 +2,7 @@
 using EventManagementAPI.Infrastructure.Interfaces;
 using EventManagementAPI.Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using EventManagementAPI.Domain.Models;
+using EventManagementAPI.Domain.Models.Common;
 
 namespace EventManagementAPI.Infrastructure.Repositories;
 
@@ -24,8 +24,8 @@ public class UserRepository : IUserRepository
 
         if (user == null) return null;
 
-        var userModelResult = new UserDomainModel(user);
-        return userModelResult;
+        var userModel = new UserDomainModel(user);
+        return userModel;
     }
 
     public async Task<UserDomainModel?> GetByEmailAsync(string email, CancellationToken cancellation)
@@ -37,8 +37,8 @@ public class UserRepository : IUserRepository
         
         if (user == null) return null;
 
-        var userModelResult = new UserDomainModel(user);
-        return userModelResult;
+        var userModel = new UserDomainModel(user);
+        return userModel;
     }
 
     public async Task<bool> ExistsByEmailOrUsernameAsync(string email, string username, CancellationToken cancellation)
@@ -59,9 +59,14 @@ public class UserRepository : IUserRepository
             .Select(role => new UserRole
             {
                 RoleId = role.Id,
-                Role = role
+                UserId = userModel.Id
             })
             .ToListAsync(cancellation);
+
+        if (userRoles.Count > userModel.Roles.Count)
+        {
+            throw new InvalidDataException("Invalid roles specified.");
+        }
 
         var user = new User
         {
@@ -87,7 +92,7 @@ public class UserRepository : IUserRepository
             })
             .ToListAsync(cancellation);
 
-        var user = await _dbContext.Users.FindAsync(userModel.Id);
+        var user = await _dbContext.Users.FindAsync(userModel.Id, cancellation);
 
         if (user == null)
         {
@@ -96,6 +101,8 @@ public class UserRepository : IUserRepository
 
         user.Username = userModel.Username;
         user.Email = userModel.Email;
+        user.HashedPassword = userModel.HashedPassword;
+        user.CreatedAt = userModel.CreatedAt;
 
         _dbContext.Users.Update(user);
     }
