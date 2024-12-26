@@ -1,5 +1,6 @@
 ﻿using EventManagementAPI.Domain.Models.EventManagement;
 using EventManagementAPI.Infrastructure.Interfaces;
+using EventManagementAPI.Domain.Models.Common;
 
 namespace EventManagementAPI.Infrastructure.Services;
 
@@ -14,6 +15,11 @@ public class EventInfrastructureService : IEventInfrastructureService
     {
         _eventRepository = eventRepository;
         _categoryRepository = categoryRepository;
+    }
+
+    public Task<PaginatedList<EventDomainModel>> GetEventsAsync(int pageSize, int page, CancellationToken cancellation)
+    {
+        return _eventRepository.GetAsync(pageSize, page, cancellation);
     }
 
     public Task<EventDomainModel?> GetEventAsync(Guid Id, CancellationToken cancellation)
@@ -36,19 +42,13 @@ public class EventInfrastructureService : IEventInfrastructureService
         return _eventRepository.UpdateAsync(userModel, cancellation);
     }
 
+    public Task DeleteEventAsync(Guid id, CancellationToken cancellation)
+    {
+        return _eventRepository.DeleteAsync(id, cancellation);
+    }
+
     public Task SaveChangesAsync(CancellationToken cancellation)
     {
         return _eventRepository.SaveChangesAsync(cancellation);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        return obj is EventInfrastructureService service &&
-               EqualityComparer<ICategoryRepository>.Default.Equals(_categoryRepository, service._categoryRepository);
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(_categoryRepository);
     }
 }

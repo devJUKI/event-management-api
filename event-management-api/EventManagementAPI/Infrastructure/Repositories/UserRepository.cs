@@ -83,16 +83,10 @@ public class UserRepository : IUserRepository
 
     public async Task UpdateAsync(UserDomainModel userModel, CancellationToken cancellation)
     {
-        var userRoles = await _dbContext.Roles
-            .Where(r => userModel.Roles.Contains(r.Name))
-            .Select(role => new UserRole
-            {
-                RoleId = role.Id,
-                Role = role
-            })
-            .ToListAsync(cancellation);
-
-        var user = await _dbContext.Users.FindAsync(userModel.Id, cancellation);
+        var user = await _dbContext.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .SingleOrDefaultAsync(u => u.Id == userModel.Id, cancellation);
 
         if (user == null)
         {
@@ -103,6 +97,33 @@ public class UserRepository : IUserRepository
         user.Email = userModel.Email;
         user.HashedPassword = userModel.HashedPassword;
         user.CreatedAt = userModel.CreatedAt;
+
+        var existingRoles = user.UserRoles.Select(ec => ec.Role.Name).ToList();
+        var rolesToAdd = userModel.Roles.Except(existingRoles).ToList();
+        var rolesToRemove = existingRoles.Except(userModel.Roles).ToList();
+
+        user.UserRoles = user.UserRoles
+            .Where(ec => !rolesToRemove.Contains(ec.Role.Name))
+            .ToList();
+
+        foreach (var roleName in rolesToAdd)
+        {
+            var role = await _dbContext.Roles
+                .SingleOrDefaultAsync(c => c.Name == roleName, cancellation);
+
+            if (role == null)
+            {
+                throw new InvalidOperationException(nameof(role));
+            }
+
+            var userRole = new UserRole
+            {
+                RoleId = role.Id,
+                UserId = user.Id
+            };
+
+            user.UserRoles.Add(userRole);
+        }
 
         _dbContext.Users.Update(user);
     }

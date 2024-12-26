@@ -30,8 +30,10 @@ public static class DependencyInjection
         services.AddAuth(configuration);
 
         services.AddValidatorsFromAssemblyContaining<Program>();
+        services.AddHttpContextAccessor();
 
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<IEventManagementService, EventManagementService>();
         services.AddScoped<IUserInfrastructureService, UserInfrastructureService>();

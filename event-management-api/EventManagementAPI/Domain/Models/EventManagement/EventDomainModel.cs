@@ -4,6 +4,7 @@ using EventManagementAPI.Domain.Entities;
 using EventManagementAPI.Core.Entities;
 using System.Data;
 using System.Net;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace EventManagementAPI.Domain.Models.EventManagement;
 
@@ -40,6 +41,25 @@ public class EventDomainModel
         Categories = @event.EventCategories
             .Select(r => r.Category.Name)
             .ToList();
+    }
+
+    public Result Update(string? title, string? description, string? location, DateTime? date, bool? isPublic, List<string>? categories)
+    {
+        var validationResult = ValidateUserData(title, location, date, CreatedBy, isPublic, categories);
+
+        if (!validationResult.IsSuccess)
+        {
+            return Result.Failure(validationResult.Error);
+        }
+
+        Title = title!;
+        Description = description ?? string.Empty;
+        Location = location!;
+        Date = date!.Value;
+        IsPublic = isPublic!.Value;
+        Categories = categories!;
+
+        return Result.Success();
     }
 
     public static Result<EventDomainModel> Create(string? title, string? description, string? location, DateTime? date, UserDomainModel? createdBy, bool? isPublic, List<string>? categories)
