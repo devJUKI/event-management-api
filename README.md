@@ -3,7 +3,7 @@ Events Management API which requirements were given by ChatGPT (Minimal APIs, Re
 
 **❓ Prompt given to ChatGPT**:
 
-`I want to practice creating REST APIs as a mid-level developer. Can you provide me with requirements for an API that I should develop?`
+`I want to practice creating REST APIs as a mid-level developer. Can you provide me with requirements for an API that I could develop?`
 
 **🤖 ChatGPT**:
 
