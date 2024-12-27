@@ -2,10 +2,10 @@
 using EventManagementAPI.ViewModels.EventManagement;
 using EventManagementAPI.Infrastructure.Interfaces;
 using EventManagementAPI.Domain.Interfaces;
-using EventManagementAPI.Domain.Entities;
-using System.Net;
 using EventManagementAPI.ViewModels.Common;
 using EventManagementAPI.Domain.Constants;
+using EventManagementAPI.Domain.Entities;
+using System.Net;
 
 namespace EventManagementAPI.Domain.Services;
 
@@ -25,7 +25,7 @@ public class EventManagementService : IEventManagementService
         _authorizationService = authorizationService;
     }
 
-    public async Task<Result<PaginatedListResponseViewModel<EventResponseViewModel>>> GetEvents(int page, int pageSize, CancellationToken cancellation)
+    public async Task<Result<PaginatedListResponseViewModel<EventResponseViewModel>>> GetEvents(int page, int pageSize, EventFilters? filters = null, CancellationToken cancellation = default)
     {
         if (pageSize > EventData.MaxPageSize)
         {
@@ -34,14 +34,15 @@ public class EventManagementService : IEventManagementService
                 $"Page size is too big. Max size is {EventData.MaxPageSize}"));
         }
 
-        var paginatedEvents = await _eventInfrastructureService.GetEventsAsync(pageSize, page, cancellation);
+        var paginatedEvents = await _eventInfrastructureService.GetEventsAsync(pageSize, page, filters, cancellation);
 
         var eventDomainList = paginatedEvents.Items.Select(e => new EventResponseViewModel(
             e.Id,
             e.Title,
             e.Description,
             e.Location,
-            e.Date,
+            e.FormattedDate,
+            e.FormattedTime,
             e.CreatedBy.Username,
             e.IsPublic,
             e.Categories))
@@ -59,7 +60,7 @@ public class EventManagementService : IEventManagementService
         return Result.Success(response);
     }
 
-    public async Task<Result<EventResponseViewModel>> GetEvent(Guid eventId, CancellationToken cancellation)
+    public async Task<Result<EventResponseViewModel>> GetEvent(Guid eventId, CancellationToken cancellation = default)
     {
         var @event = await _eventInfrastructureService.GetEventAsync(eventId, cancellation);
 
@@ -73,7 +74,8 @@ public class EventManagementService : IEventManagementService
             @event.Title,
             @event.Description,
             @event.Location,
-            @event.Date,
+            @event.FormattedDate,
+            @event.FormattedTime,
             @event.CreatedBy.Username,
             @event.IsPublic,
             @event.Categories);
@@ -81,7 +83,26 @@ public class EventManagementService : IEventManagementService
         return Result.Success(response);
     }
 
-    public async Task<Result<EventResponseViewModel>> CreateEvent(CreateEventDomainModel domainModel, CancellationToken cancellation)
+    public async Task<Result<List<CategoryResponseViewModel>>> GetCategories(List<int>? ids = null, CancellationToken cancellation = default)
+    {
+        var distinctCategoryIds = ids?
+            .Distinct()
+            .ToList();
+        var categories = await _eventInfrastructureService.GetCategories(distinctCategoryIds, cancellation);
+
+        if (ids != null && distinctCategoryIds!.Count > categories.Count)
+        {
+            return Result.Failure<List<CategoryResponseViewModel>>(new Error(HttpStatusCode.NotFound, "Specified category/categories doesn't exist"));
+        }
+
+        var response = categories
+            .Select(c => new CategoryResponseViewModel(c.Id, c.Name))
+            .ToList();
+
+        return Result.Success(response);
+    }
+
+    public async Task<Result<EventResponseViewModel>> CreateEvent(CreateEventDomainModel domainModel, CancellationToken cancellation = default)
     {
         if (!_authorizationService.IsAuthorized(domainModel.CreatedById))
         {
@@ -105,6 +126,8 @@ public class EventManagementService : IEventManagementService
             return Result.Failure<EventResponseViewModel>(new Error(HttpStatusCode.NotFound, "Specified category/categories doesn't exist"));
         }
 
+        var categoryNames = categories.Select(c => c.Name).ToList();
+
         var eventResult = EventDomainModel.Create(
             domainModel.Title,
             domainModel.Description,
@@ -112,7 +135,7 @@ public class EventManagementService : IEventManagementService
             domainModel.Date,
             user,
             domainModel.IsPublic,
-            categories);
+            categoryNames);
 
         if (eventResult.IsFailure)
         {
@@ -129,7 +152,8 @@ public class EventManagementService : IEventManagementService
             @event.Title,
             @event.Description,
             @event.Location,
-            @event.Date,
+            @event.FormattedDate,
+            @event.FormattedTime,
             @event.CreatedBy.Username,
             @event.IsPublic,
             @event.Categories);
@@ -137,7 +161,7 @@ public class EventManagementService : IEventManagementService
         return Result.Success(response);
     }
 
-    public async Task<Result<EventResponseViewModel>> UpdateEvent(UpdateEventDomainModel domainModel, CancellationToken cancellation)
+    public async Task<Result<EventResponseViewModel>> UpdateEvent(UpdateEventDomainModel domainModel, CancellationToken cancellation = default)
     {
         var @event = await _eventInfrastructureService.GetEventAsync(domainModel.EventId, cancellation);
 
@@ -161,13 +185,15 @@ public class EventManagementService : IEventManagementService
             return Result.Failure<EventResponseViewModel>(new Error(HttpStatusCode.NotFound, "Specified category/categories doesn't exist"));
         }
 
+        var categoryNames = categories.Select(c => c.Name).ToList();
+
         @event.Update(
             domainModel.Title,
             domainModel.Description,
             domainModel.Location,
             domainModel.Date,
             domainModel.IsPublic,
-            categories);
+            categoryNames);
 
         await _eventInfrastructureService.UpdateEventAsync(@event, cancellation);
         await _eventInfrastructureService.SaveChangesAsync(cancellation);
@@ -177,7 +203,8 @@ public class EventManagementService : IEventManagementService
             @event.Title,
             @event.Description,
             @event.Location,
-            @event.Date,
+            @event.FormattedDate,
+            @event.FormattedTime,
             @event.CreatedBy.Username,
             @event.IsPublic,
             @event.Categories);
@@ -185,7 +212,7 @@ public class EventManagementService : IEventManagementService
         return Result.Success(response);
     }
 
-    public async Task<Result> DeleteEvent(Guid eventId, CancellationToken cancellation)
+    public async Task<Result> DeleteEvent(Guid eventId, CancellationToken cancellation = default)
     {
         await _eventInfrastructureService.DeleteEventAsync(eventId, cancellation);
         await _eventInfrastructureService.SaveChangesAsync(cancellation);

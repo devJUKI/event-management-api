@@ -2,6 +2,7 @@
 using EventManagementAPI.ViewModels.EventManagement;
 using EventManagementAPI.Domain.Extensions;
 using EventManagementAPI.Domain.Interfaces;
+using EventManagementAPI.Domain.Entities;
 using EventManagementAPI.Domain.Helpers;
 using EventManagementAPI.Filters;
 
@@ -15,13 +16,15 @@ public static class EventManagementEndpoints
             .MapGroup("/events")
             .WithTags("Event Management");
 
-        mapGroup.MapGet("/", async (
+        mapGroup.MapGet("/", async(
             int page,
             int pageSize,
+            [AsParameters] EventFilters filters,
+            HttpContext httpContext,
             IEventManagementService eventService,
             CancellationToken cancellation) =>
         {
-            var response = await eventService.GetEvents(page, pageSize, cancellation);
+            var response = await eventService.GetEvents(page, pageSize, filters, cancellation);
 
             return response.Match(CustomResults.Ok, CustomResults.Problem);
         });

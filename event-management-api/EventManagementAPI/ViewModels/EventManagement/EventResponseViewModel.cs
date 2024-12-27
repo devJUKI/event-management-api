@@ -5,7 +5,8 @@ public record EventResponseViewModel(
     string Title,
     string Description,
     string Location,
-    DateTime Date,
+    string Date,
+    string Time,
     string CreatedBy,
     bool IsPublic,
     List<string> Categories);

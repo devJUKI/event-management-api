@@ -4,7 +4,6 @@ using EventManagementAPI.Domain.Entities;
 using EventManagementAPI.Core.Entities;
 using System.Data;
 using System.Net;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace EventManagementAPI.Domain.Models.EventManagement;
 
@@ -15,6 +14,8 @@ public class EventDomainModel
     public string Description { get; private set; } = string.Empty;
     public string Location { get; private set; } = string.Empty;
     public DateTime Date { get; private set; }
+    public string FormattedDate => Date.ToString("yyyy-MM-dd");
+    public string FormattedTime => Date.ToString("HH:mm");
     public UserDomainModel CreatedBy { get; } = default!;
     public bool IsPublic { get; private set; }
     public List<string> Categories { get; private set; } = [];
@@ -37,6 +38,7 @@ public class EventDomainModel
         Description = @event.Description;
         Location = @event.Location;
         CreatedBy = new UserDomainModel(@event.CreatedBy);
+        Date = @event.Date;
         IsPublic = @event.IsPublic;
         Categories = @event.EventCategories
             .Select(r => r.Category.Name)

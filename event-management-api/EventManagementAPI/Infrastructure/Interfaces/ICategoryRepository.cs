@@ -1,6 +1,8 @@
-﻿namespace EventManagementAPI.Infrastructure.Interfaces;
+﻿using EventManagementAPI.Domain.Models.Common;
+
+namespace EventManagementAPI.Infrastructure.Interfaces;
 
 public interface ICategoryRepository
 {
-    Task<List<string>> GetCategories(List<int> ids, CancellationToken cancellation);
+    Task<List<CategoryDomainModel>> GetCategories(List<int>? ids = null, CancellationToken cancellation = default);
 }

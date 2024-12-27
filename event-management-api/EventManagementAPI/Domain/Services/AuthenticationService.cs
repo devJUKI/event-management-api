@@ -26,7 +26,7 @@ public class AuthenticationService : IAuthenticationService
         _jwtTokenGenerator = jwtTokenGenerator;
     }
 
-    public async Task<Result<AuthResponseViewModel>> Register(RegisterDomainModel domainModel, CancellationToken cancellation)
+    public async Task<Result<AuthResponseViewModel>> Register(RegisterDomainModel domainModel, CancellationToken cancellation = default)
     {
         var hashedPassword = _passwordHasher.Hash(domainModel.Password);
 
@@ -62,7 +62,7 @@ public class AuthenticationService : IAuthenticationService
         return Result.Success(response);
     }
 
-    public async Task<Result<AuthResponseViewModel>> Login(LoginDomainModel domainModel, CancellationToken cancellation)
+    public async Task<Result<AuthResponseViewModel>> Login(LoginDomainModel domainModel, CancellationToken cancellation = default)
     {
         var user = await _infrastructureService.GetUserByEmailAsync(domainModel.Email, cancellation);
 

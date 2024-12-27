@@ -19,7 +19,7 @@ public class UserManagementService : IUserManagementService
         _passwordHasher = passwordHasher;
     }
 
-    public async Task<Result<UserResponseViewModel>> GetUser(Guid userId, CancellationToken cancellation)
+    public async Task<Result<UserResponseViewModel>> GetUser(Guid userId, CancellationToken cancellation = default)
     {
         var user = await _infrastructureService.GetUserAsync(userId, cancellation);
 
@@ -33,7 +33,7 @@ public class UserManagementService : IUserManagementService
         return Result.Success(userResponse);
     }
 
-    public async Task<Result<UserResponseViewModel>> UpdateUser(Guid userId, UpdateUserRequestDomainModel domainModel, CancellationToken cancellation)
+    public async Task<Result<UserResponseViewModel>> UpdateUser(Guid userId, UpdateUserRequestDomainModel domainModel, CancellationToken cancellation = default)
     {
         var user = await _infrastructureService.GetUserAsync(userId, cancellation);
 

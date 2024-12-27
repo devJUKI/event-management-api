@@ -7,9 +7,10 @@ namespace EventManagementAPI.Domain.Interfaces;
 
 public interface IEventManagementService
 {
-    Task<Result<PaginatedListResponseViewModel<EventResponseViewModel>>> GetEvents(int page, int pageSize, CancellationToken cancellation);
-    Task<Result<EventResponseViewModel>> GetEvent(Guid eventId, CancellationToken cancellation);
-    Task<Result<EventResponseViewModel>> CreateEvent(CreateEventDomainModel domainModel, CancellationToken cancellation);
-    Task<Result<EventResponseViewModel>> UpdateEvent(UpdateEventDomainModel domainModel, CancellationToken cancellation);
-    Task<Result> DeleteEvent(Guid eventId, CancellationToken cancellation);
+    Task<Result<PaginatedListResponseViewModel<EventResponseViewModel>>> GetEvents(int page, int pageSize, EventFilters? filters = null, CancellationToken cancellation = default);
+    Task<Result<EventResponseViewModel>> GetEvent(Guid eventId, CancellationToken cancellation = default);
+    Task<Result<List<CategoryResponseViewModel>>> GetCategories(List<int>? ids = null, CancellationToken cancellation = default);
+    Task<Result<EventResponseViewModel>> CreateEvent(CreateEventDomainModel domainModel, CancellationToken cancellation = default);
+    Task<Result<EventResponseViewModel>> UpdateEvent(UpdateEventDomainModel domainModel, CancellationToken cancellation = default);
+    Task<Result> DeleteEvent(Guid eventId, CancellationToken cancellation = default);
 }

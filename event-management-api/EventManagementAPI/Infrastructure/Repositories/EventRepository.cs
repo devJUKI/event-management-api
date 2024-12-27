@@ -4,6 +4,7 @@ using EventManagementAPI.Infrastructure.Interfaces;
 using EventManagementAPI.Domain.Models.Common;
 using EventManagementAPI.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using EventManagementAPI.Domain.Entities;
 
 namespace EventManagementAPI.Infrastructure.Repositories;
 
@@ -16,27 +17,54 @@ public class EventRepository : IEventRepository
         _dbContext = dbContext;
     }
 
-    public async Task<PaginatedList<EventDomainModel>> GetAsync(int pageSize, int page, CancellationToken cancellation)
+    public async Task<PaginatedList<EventDomainModel>> GetAsync(int pageSize, int page, EventFilters? filters = null, CancellationToken cancellation = default)
     {
-        var totalCount = await _dbContext.Events.CountAsync();
+        var query = _dbContext.Events.AsQueryable();
 
-        var events = await _dbContext.Events
+        if (filters != null)
+        {
+            if (!string.IsNullOrEmpty(filters.Title))
+                query = query.Where(e => e.Title.Contains(filters.Title));
+
+            if (!string.IsNullOrEmpty(filters.Location))
+                query = query.Where(e => e.Location.Contains(filters.Location));
+
+            if (filters.DateFrom.HasValue)
+                query = query.Where(e => e.Date >= filters.DateFrom.Value);
+
+            if (filters.DateTo.HasValue)
+                query = query.Where(e => e.Date <= filters.DateTo.Value);
+
+            if (filters.IsPublic.HasValue)
+                query = query.Where(e => e.IsPublic == filters.IsPublic);
+
+            if (!string.IsNullOrEmpty(filters.Category))
+                query = query.Where(e => e.EventCategories.Any(ec => ec.Category.Name == filters.Category));
+        }
+
+        var totalCount = await _dbContext.Events.CountAsync(cancellation);
+
+        var filteredEvents = await query
             .Include(e => e.CreatedBy)
+            .Include(e => e.EventCategories)
+            .ThenInclude(ec => ec.Category)
             .OrderBy(e => e.Id)
             .Skip(pageSize * (page - 1))
             .Take(pageSize)
             .Select(e => new EventDomainModel(e))
             .ToListAsync(cancellation);
 
-        var paginatedModels = new PaginatedList<EventDomainModel>(events, page, totalCount, pageSize);
+        var paginatedModels = new PaginatedList<EventDomainModel>(filteredEvents, page, totalCount, pageSize);
 
         return paginatedModels;
     }
 
-    public async Task<EventDomainModel?> GetAsync(Guid Id, CancellationToken cancellation)
+    public async Task<EventDomainModel?> GetAsync(Guid Id, CancellationToken cancellation = default)
     {
         var @event = await _dbContext.Events
             .Include(e => e.CreatedBy)
+            .Include(e => e.EventCategories)
+            .ThenInclude(ec => ec.Category)
             .SingleOrDefaultAsync(e => e.Id == Id, cancellation);
 
         if (@event == null) return null;
@@ -45,7 +73,7 @@ public class EventRepository : IEventRepository
         return eventModel;
     }
 
-    public async Task InsertAsync(EventDomainModel eventModel, CancellationToken cancellation)
+    public async Task InsertAsync(EventDomainModel eventModel, CancellationToken cancellation = default)
     {
         var eventCategories = await _dbContext.Categories
             .Where(c => eventModel.Categories.Contains(c.Name))
@@ -76,7 +104,7 @@ public class EventRepository : IEventRepository
         await _dbContext.Events.AddAsync(@event, cancellation);
     }
 
-    public async Task UpdateAsync(EventDomainModel eventModel, CancellationToken cancellation)
+    public async Task UpdateAsync(EventDomainModel eventModel, CancellationToken cancellation = default)
     {
         var @event = await _dbContext.Events
             .Include(e => e.EventCategories)
@@ -124,7 +152,7 @@ public class EventRepository : IEventRepository
         _dbContext.Events.Update(@event);
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellation)
+    public async Task DeleteAsync(Guid id, CancellationToken cancellation = default)
     {
         var @event = await _dbContext.Events.FindAsync(id, cancellation);
 
@@ -136,7 +164,7 @@ public class EventRepository : IEventRepository
         _dbContext.Events.Remove(@event);
     }
 
-    public async Task SaveChangesAsync(CancellationToken cancellation)
+    public async Task SaveChangesAsync(CancellationToken cancellation = default)
     {
         await _dbContext.SaveChangesAsync(cancellation);
     }

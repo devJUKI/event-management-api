@@ -1,5 +1,6 @@
-﻿using EventManagementAPI.Infrastructure.Interfaces;
-using EventManagementAPI.Infrastructure.Persistence;
+﻿using EventManagementAPI.Infrastructure.Persistence;
+using EventManagementAPI.Infrastructure.Interfaces;
+using EventManagementAPI.Domain.Models.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManagementAPI.Infrastructure.Repositories;
@@ -13,11 +14,21 @@ public class CategoryRepository : ICategoryRepository
         _dbContext = dbContext;
     }
 
-    public Task<List<string>> GetCategories(List<int> ids, CancellationToken cancellation)
+    public Task<List<CategoryDomainModel>> GetCategories(List<int>? ids = null, CancellationToken cancellation = default)
     {
-        return _dbContext.Categories
-            .Where(c => ids.Contains(c.Id))
-            .Select(c => c.Name)
+        var query = _dbContext.Categories.AsQueryable();
+
+        if (ids != null && ids.Count != 0)
+        {
+            query = query.Where(c => ids.Contains(c.Id));
+        }
+
+        return query
+            .Select(c => new CategoryDomainModel
+            {
+                Id = c.Id,
+                Name = c.Name
+            })
             .ToListAsync(cancellation);
     }
 }

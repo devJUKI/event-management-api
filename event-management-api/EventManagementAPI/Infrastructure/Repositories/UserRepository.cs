@@ -1,8 +1,8 @@
 ﻿using EventManagementAPI.Infrastructure.Persistence;
 using EventManagementAPI.Infrastructure.Interfaces;
+using EventManagementAPI.Domain.Models.Common;
 using EventManagementAPI.Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using EventManagementAPI.Domain.Models.Common;
 
 namespace EventManagementAPI.Infrastructure.Repositories;
 
@@ -15,7 +15,7 @@ public class UserRepository : IUserRepository
         _dbContext = dbContext;
     }
 
-    public async Task<UserDomainModel?> GetAsync(Guid Id, CancellationToken cancellation)
+    public async Task<UserDomainModel?> GetAsync(Guid Id, CancellationToken cancellation = default)
     {
         var user = await _dbContext.Users
             .Include(u => u.UserRoles)
@@ -28,7 +28,7 @@ public class UserRepository : IUserRepository
         return userModel;
     }
 
-    public async Task<UserDomainModel?> GetByEmailAsync(string email, CancellationToken cancellation)
+    public async Task<UserDomainModel?> GetByEmailAsync(string email, CancellationToken cancellation = default)
     {
         var user = await _dbContext.Users
             .Include(u => u.UserRoles)
@@ -41,7 +41,7 @@ public class UserRepository : IUserRepository
         return userModel;
     }
 
-    public async Task<bool> ExistsByEmailOrUsernameAsync(string email, string username, CancellationToken cancellation)
+    public async Task<bool> ExistsByEmailOrUsernameAsync(string email, string username, CancellationToken cancellation = default)
     {
         var exists = await _dbContext.Users
             .AnyAsync(u =>
@@ -52,7 +52,7 @@ public class UserRepository : IUserRepository
         return exists;
     }
 
-    public async Task InsertAsync(UserDomainModel userModel, CancellationToken cancellation)
+    public async Task InsertAsync(UserDomainModel userModel, CancellationToken cancellation = default)
     {
         var userRoles = await _dbContext.Roles
             .Where(r => userModel.Roles.Contains(r.Name))
@@ -81,7 +81,7 @@ public class UserRepository : IUserRepository
         await _dbContext.Users.AddAsync(user, cancellation);
     }
 
-    public async Task UpdateAsync(UserDomainModel userModel, CancellationToken cancellation)
+    public async Task UpdateAsync(UserDomainModel userModel, CancellationToken cancellation = default)
     {
         var user = await _dbContext.Users
             .Include(u => u.UserRoles)

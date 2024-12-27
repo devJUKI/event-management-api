@@ -34,6 +34,7 @@ namespace EventManagementAPI
             app.MapAuthenticationEndpoints();
             app.MapUserManagementEndpoints();
             app.MapEventManagementEndpoints();
+            app.MapCategoryEndpoints();
 
             app.Run();
         }
