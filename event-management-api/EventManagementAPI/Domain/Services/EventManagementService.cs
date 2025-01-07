@@ -36,16 +36,17 @@ public class EventManagementService : IEventManagementService
 
         var paginatedEvents = await _eventInfrastructureService.GetEventsAsync(pageSize, page, filters, cancellation);
 
-        var eventDomainList = paginatedEvents.Items.Select(e => new EventResponseViewModel(
-            e.Id,
-            e.Title,
-            e.Description,
-            e.Location,
-            e.FormattedDate,
-            e.FormattedTime,
-            e.CreatedBy.Username,
-            e.IsPublic,
-            e.Categories))
+        var eventDomainList = paginatedEvents.Items.Select(e =>
+            new EventResponseViewModel(
+                e.Id,
+                e.Title,
+                e.Description,
+                e.Location,
+                e.FormattedDate,
+                e.FormattedTime,
+                e.CreatedBy.Username,
+                e.IsPublic,
+                e.Categories))
             .ToList();
 
         var response = new PaginatedListResponseViewModel<EventResponseViewModel>(

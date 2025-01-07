@@ -42,7 +42,7 @@ public class EventRepository : IEventRepository
                 query = query.Where(e => e.EventCategories.Any(ec => ec.Category.Name == filters.Category));
         }
 
-        var totalCount = await _dbContext.Events.CountAsync(cancellation);
+        var totalCount = await query.CountAsync(cancellation);
 
         var filteredEvents = await query
             .Include(e => e.CreatedBy)
@@ -73,7 +73,7 @@ public class EventRepository : IEventRepository
         return eventModel;
     }
 
-    public async Task InsertAsync(EventDomainModel eventModel, CancellationToken cancellation = default)
+    public async Task<Guid> InsertAsync(EventDomainModel eventModel, CancellationToken cancellation = default)
     {
         var eventCategories = await _dbContext.Categories
             .Where(c => eventModel.Categories.Contains(c.Name))
@@ -102,6 +102,7 @@ public class EventRepository : IEventRepository
         };
 
         await _dbContext.Events.AddAsync(@event, cancellation);
+        return @event.Id;
     }
 
     public async Task UpdateAsync(EventDomainModel eventModel, CancellationToken cancellation = default)

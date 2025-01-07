@@ -27,7 +27,7 @@ public class UserInfrastructureService : IUserInfrastructureService
         return _userRepository.ExistsByEmailOrUsernameAsync(email, username, cancellation);
     }
 
-    public Task CreateUserAsync(UserDomainModel userModel, CancellationToken cancellation = default)
+    public Task<Guid> CreateUserAsync(UserDomainModel userModel, CancellationToken cancellation = default)
     {
         return _userRepository.InsertAsync(userModel, cancellation);
     }

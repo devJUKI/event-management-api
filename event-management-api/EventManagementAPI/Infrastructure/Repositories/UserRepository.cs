@@ -52,7 +52,7 @@ public class UserRepository : IUserRepository
         return exists;
     }
 
-    public async Task InsertAsync(UserDomainModel userModel, CancellationToken cancellation = default)
+    public async Task<Guid> InsertAsync(UserDomainModel userModel, CancellationToken cancellation = default)
     {
         var userRoles = await _dbContext.Roles
             .Where(r => userModel.Roles.Contains(r.Name))
@@ -79,6 +79,7 @@ public class UserRepository : IUserRepository
         };
 
         await _dbContext.Users.AddAsync(user, cancellation);
+        return user.Id;
     }
 
     public async Task UpdateAsync(UserDomainModel userModel, CancellationToken cancellation = default)

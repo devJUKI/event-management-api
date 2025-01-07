@@ -14,21 +14,14 @@ public class AuthorizationService : IAuthorizationService
 
     public bool IsAuthorized(Guid ownerGuid)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-
-        if (httpContext == null)
-        {
-            throw new InvalidOperationException("HttpContext is null");
-        }
-
-        bool isAdmin = httpContext.IsAdmin();
+        bool isAdmin = _httpContextAccessor.IsAdmin();
 
         if (isAdmin)
         {
             return true;
         }
 
-        var userId = httpContext.GetUserId();
+        var userId = _httpContextAccessor.GetUserId();
 
         return ownerGuid == userId;
     }

@@ -36,11 +36,14 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>();
         services.AddScoped<IUserManagementService, UserManagementService>();
         services.AddScoped<IEventManagementService, EventManagementService>();
+        services.AddScoped<IAttendanceService, AttendanceService>();
         services.AddScoped<IUserInfrastructureService, UserInfrastructureService>();
         services.AddScoped<IEventInfrastructureService, EventInfrastructureService>();
+        services.AddScoped<IAttendanceInfrastructureService, AttendanceInfrastructureService>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IAttendanceRepository, AttendanceRepository>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
     }

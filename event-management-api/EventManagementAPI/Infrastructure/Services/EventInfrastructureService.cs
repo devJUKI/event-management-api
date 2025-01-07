@@ -33,7 +33,7 @@ public class EventInfrastructureService : IEventInfrastructureService
         return _categoryRepository.GetCategories(ids, cancellation);
     }
 
-    public Task CreateEventAsync(EventDomainModel userModel, CancellationToken cancellation = default)
+    public Task<Guid> CreateEventAsync(EventDomainModel userModel, CancellationToken cancellation = default)
     {
         return _eventRepository.InsertAsync(userModel, cancellation);
     }

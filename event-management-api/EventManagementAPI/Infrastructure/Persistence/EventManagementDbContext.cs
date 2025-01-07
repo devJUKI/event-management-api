@@ -11,6 +11,7 @@ public class EventManagementDbContext : DbContext
     public DbSet<Event> Events { get; set; }
     public DbSet<EventCategory> EventCategories { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<Attendance> Attendances { get; set; }
 
     public EventManagementDbContext(DbContextOptions<EventManagementDbContext> options) : base(options)
     {
@@ -60,5 +61,15 @@ public class EventManagementDbContext : DbContext
             new Role { Id = 4, Name = "Seminar" },
             new Role { Id = 5, Name = "Networking" }
         );
+
+        // Attendance
+        modelBuilder.Entity<Attendance>()
+            .HasKey(a => new { a.UserId, a.EventId });
+
+        modelBuilder.Entity<Attendance>()
+            .HasOne(a => a.User)
+            .WithMany()
+            .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
